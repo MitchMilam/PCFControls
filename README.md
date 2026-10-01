@@ -16,7 +16,9 @@ You have to click on the icon in order to display the recalculate button. That's
 The idea of the click is to have a common field with the look'n'feel similar to the others and just have to click once to refresh it.
 
 Drawback, when attaching the PCF control to a rollup field, the look'n'feel by default remains.
-So I suggest to attach it to a random field.
+Model-driven forms always render their built-in rollup UI for rollup (and calculated) columns, and a PCF control bound to one does not replace it.
+
+**Recommended setup:** attach the control to a dedicated, otherwise unused placeholder column (e.g. a single line of text or a whole number named `Rollup Display - <name>`), put only that placeholder on the form, and **do not add the real rollup field to the form**. The control never writes to the placeholder; it reads the rollup value itself through the Web API, using the logical name you set in the `RollupField` parameter.
 
 ### Demo 
 On top you will find the standard behavior and at the bottom the PCF behavior
