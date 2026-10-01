@@ -109,7 +109,9 @@ export class RollupFieldControl extends React.Component<IRollupFieldControlProps
     }
   }
 
-  // The raw _date is UTC; convert it to the time zone and format configured in the user's own settings
+  // The raw _date is UTC; convert it to the time zone and format configured in the user's own settings.
+  // Formatting is done here, from the user's short date/time patterns, so the result does not depend on
+  // how the platform's formatDateShort treats the browser's time zone.
   private formatUserLocalDate(rawDate?: string | null): string | undefined {
     if (!rawDate)
       return undefined;
@@ -119,10 +121,42 @@ export class RollupFieldControl extends React.Component<IRollupFieldControlProps
       return undefined;
 
     const { formatting, userSettings } = this.props.context;
-    // Shift so the browser-local fields of the Date equal the wall-clock time in the user's CRM time zone
-    const offsetMinutes = userSettings.getTimeZoneOffsetMinutes(utc) + utc.getTimezoneOffset();
-    const userLocal = new Date(utc.getTime() + offsetMinutes * 60000);
-    return formatting.formatDateShort(userLocal, true);
+    try {
+      // Wall-clock time in the user's CRM time zone, read back through the UTC getters
+      const wall = new Date(utc.getTime() + userSettings.getTimeZoneOffsetMinutes(utc) * 60000);
+      const info = userSettings.dateFormattingInfo;
+      const pad = (n: number) => n.toString().padStart(2, "0");
+      const hours12 = wall.getUTCHours() % 12 === 0 ? 12 : wall.getUTCHours() % 12;
+
+      const render = (pattern: string) => pattern.replace(/yyyy|yy|MMMM|MMM|MM|M|dd|d|hh|h|HH|H|mm|m|tt|t|\/|:/g, token => {
+        switch (token) {
+          case "yyyy": return wall.getUTCFullYear().toString();
+          case "yy": return pad(wall.getUTCFullYear() % 100);
+          case "MMMM": return info.monthNames[wall.getUTCMonth()];
+          case "MMM": return info.abbreviatedMonthNames[wall.getUTCMonth()];
+          case "MM": return pad(wall.getUTCMonth() + 1);
+          case "M": return (wall.getUTCMonth() + 1).toString();
+          case "dd": return pad(wall.getUTCDate());
+          case "d": return wall.getUTCDate().toString();
+          case "hh": return pad(hours12);
+          case "h": return hours12.toString();
+          case "HH": return pad(wall.getUTCHours());
+          case "H": return wall.getUTCHours().toString();
+          case "mm": return pad(wall.getUTCMinutes());
+          case "m": return wall.getUTCMinutes().toString();
+          case "tt": return wall.getUTCHours() < 12 ? info.amDesignator : info.pmDesignator;
+          case "t": return (wall.getUTCHours() < 12 ? info.amDesignator : info.pmDesignator).charAt(0);
+          case "/": return info.dateSeparator;
+          case ":": return info.timeSeparator;
+          default: return token;
+        }
+      });
+
+      return `${render(info.shortDatePattern)} ${render(info.shortTimePattern)}`;
+    }
+    catch {
+      return formatting.formatDateShort(utc, true);
+    }
   }
 
   private getData = async () => {
