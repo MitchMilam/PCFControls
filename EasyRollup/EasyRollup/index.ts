@@ -20,7 +20,7 @@ export class EasyRollupField implements ComponentFramework.ReactControl<IInputs,
 	 * @param state A piece of data that persists in one session for a single user. Can be set at any point in a controls life cycle by calling 'setControlState' in the Mode interface.
 	 * @param container If a control is marked control-type='standard', it will receive an empty div element within which it can render its content.
 	 */
-	public async init(context: ComponentFramework.Context<IInputs>, notifyOutputChanged: () => void, state: ComponentFramework.Dictionary, container:HTMLDivElement)
+	public init(context: ComponentFramework.Context<IInputs>, notifyOutputChanged: () => void, state: ComponentFramework.Dictionary, container:HTMLDivElement)
 	{				
 		this.rollupField = context.parameters.RollupField.raw!;
 
@@ -36,6 +36,17 @@ export class EasyRollupField implements ComponentFramework.ReactControl<IInputs,
 		this._recordDetails.Id = contextInfo.entityId;
 		this._recordDetails.Name = contextInfo.entityRecordName;
 		this._recordDetails.EntitySetName = this.getEntityPluralName(contextInfo.entityTypeName);
+
+		// Replace the guessed plural with the real entity set name once metadata is available
+		const utils = context.utils as any;
+		if (utils?.getEntityMetadata) {
+			utils.getEntityMetadata(contextInfo.entityTypeName, []).then((metadata: any) => {
+				if (metadata?.EntitySetName && metadata.EntitySetName !== this._recordDetails.EntitySetName) {
+					// entityRef is passed to the component by reference, so it picks this up on the next refresh
+					this._recordDetails.EntitySetName = metadata.EntitySetName;
+				}
+			}, () => { /* keep the guessed name */ });
+		}
 	}
 
 	private renderControl(context: ComponentFramework.Context<IInputs>) : React.ReactElement {

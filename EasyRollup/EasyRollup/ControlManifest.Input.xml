@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <manifest>
-  <control namespace="Carfup" constructor="EasyRollupField" version="0.0.10" display-name-key="Carfup.EasyRollup" description-key="EasyRollup description" control-type="virtual">
+  <control namespace="Carfup" constructor="EasyRollupField" version="0.0.11" display-name-key="Carfup.EasyRollup" description-key="EasyRollup description" control-type="virtual">
     <property name="FieldToAttachControl" display-name-key="FieldToAttachControl" description-key="FieldToAttachControl" of-type-group="numbers" usage="bound" required="true" />
     <property name="RollupField" display-name-key="RollupField Logical Name" description-key="RollupField Logical Name" of-type="SingleLine.Text" usage="input" required="true" />
     <type-group name="numbers">
