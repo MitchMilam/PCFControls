@@ -9,6 +9,8 @@
 
 [Get the latest solution here](https://github.com/carfup/PCFControls/releases)
 
+[Get the updated Easy Rollup solution (0.0.15) here](https://github.com/MitchMilam/PCFControls/releases) - EasyRollup only, with the fixes from this fork.
+
 ## Easy Rollup Field
 ### Purpose 
 The out of the box rollup field are (according to me) not really well integrated into the forms.
