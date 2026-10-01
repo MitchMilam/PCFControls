@@ -109,6 +109,22 @@ export class RollupFieldControl extends React.Component<IRollupFieldControlProps
     }
   }
 
+  // The raw _date is UTC; convert it to the time zone and format configured in the user's own settings
+  private formatUserLocalDate(rawDate?: string | null): string | undefined {
+    if (!rawDate)
+      return undefined;
+
+    const utc = new Date(rawDate);
+    if (isNaN(utc.getTime()))
+      return undefined;
+
+    const { formatting, userSettings } = this.props.context;
+    // Shift so the browser-local fields of the Date equal the wall-clock time in the user's CRM time zone
+    const offsetMinutes = userSettings.getTimeZoneOffsetMinutes(utc) + utc.getTimezoneOffset();
+    const userLocal = new Date(utc.getTime() + offsetMinutes * 60000);
+    return formatting.formatDateShort(userLocal, true);
+  }
+
   private getData = async () => {
     const { context, entityRef, rollupField } = this.props;
     if (!entityRef.Id)
@@ -125,7 +141,7 @@ export class RollupFieldControl extends React.Component<IRollupFieldControlProps
       // The server-formatted value is correct for every type (currency, decimal, whole number, ...)
       this.safeSetState({
         value : raw == null ? null : (result[`${rollupField}${formattedKey}`] ?? String(raw)),
-        date : result[`${rollupField}_date${formattedKey}`] ?? result[`${rollupField}_date`] ?? undefined
+        date : this.formatUserLocalDate(result[`${rollupField}_date`]) ?? result[`${rollupField}_date${formattedKey}`] ?? undefined
       });
     }
     catch (error) {

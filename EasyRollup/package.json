@@ -1,6 +1,6 @@
 {
   "name": "pcf-project",
-  "version": "0.0.13",
+  "version": "0.0.14",
   "description": "Project containing your PowerApps Component Framework (PCF) control.",
   "scripts": {
     "build": "pcf-scripts build",
