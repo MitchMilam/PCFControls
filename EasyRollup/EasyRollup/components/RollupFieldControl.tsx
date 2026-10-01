@@ -7,6 +7,7 @@ import { Calculator20Regular } from '@fluentui/react-icons';
 export interface IRollupFieldControlState {
   value?: string | null;
   date?: string;
+  displayName?: string;
   updated?: string | null | undefined;
   result : "success" | "none" | "error" | "warning" | undefined;
 }
@@ -15,6 +16,8 @@ export class RollupFieldControl extends React.Component<IRollupFieldControlProps
   private readonly tooltipId = `easyrollup-${Math.random().toString(36).slice(2)}`;
   private clearMessageTimeout?: ReturnType<typeof setTimeout>;
   private mounted = false;
+  private loadedForId?: string;
+  private loading = false;
 
   constructor(props :IRollupFieldControlProps){
     super(props);
@@ -24,6 +27,30 @@ export class RollupFieldControl extends React.Component<IRollupFieldControlProps
   public componentDidMount() {
     this.mounted = true;
     this.getData();
+    this.loadDisplayName();
+  }
+
+  private get label(): string {
+    return this.state.displayName || this.props.rollupField;
+  }
+
+  // Friendly name of the rollup column for messages; falls back to the logical name
+  private async loadDisplayName() {
+    const { context, entityRef, rollupField } = this.props;
+    try {
+      const metadata = await (context.utils as any).getEntityMetadata(entityRef.EntityName, [rollupField]);
+      const attributes = metadata?.Attributes;
+      const attribute = attributes?.getByName?.(rollupField) ?? attributes?.get?.(rollupField);
+      if (attribute?.DisplayName)
+        this.safeSetState({ displayName : attribute.DisplayName });
+    }
+    catch { /* keep the logical name */ }
+  }
+
+  public componentDidUpdate() {
+    // The record id may only become available after the first render
+    if (this.props.entityRef.Id && this.props.entityRef.Id !== this.loadedForId && !this.loading)
+      this.getData();
   }
 
   public componentWillUnmount() {
@@ -38,9 +65,13 @@ export class RollupFieldControl extends React.Component<IRollupFieldControlProps
   }
 
   private refreshData = async () => {
-    this.safeSetState({ updated : "Value is being refreshed.. Please wait.", result : "none" });
-
     const { clientUrl, entityRef, rollupField } = this.props;
+    if (!entityRef.Id) {
+      this.safeSetState({ updated : `Save the record before refreshing ${this.label}.`, result : "warning" });
+      return;
+    }
+
+    this.safeSetState({ updated : "Value is being refreshed.. Please wait.", result : "none" });
     const target = encodeURIComponent(`{'@odata.id':'${entityRef.EntitySetName}(${entityRef.Id})'}`);
     const url = `${clientUrl}/api/data/v9.0/CalculateRollupField(Target=@target,FieldName=@fieldname)?@target=${target}&@fieldname='${rollupField}'`;
 
@@ -65,7 +96,7 @@ export class RollupFieldControl extends React.Component<IRollupFieldControlProps
       }
 
       await this.getData();
-      this.safeSetState({ updated : `${rollupField} was successfully updated.`, result : "success" });
+      this.safeSetState({ updated : `${this.label} was successfully updated.`, result : "success" });
 
       if (this.clearMessageTimeout)
         clearTimeout(this.clearMessageTimeout);
@@ -80,6 +111,11 @@ export class RollupFieldControl extends React.Component<IRollupFieldControlProps
 
   private getData = async () => {
     const { context, entityRef, rollupField } = this.props;
+    if (!entityRef.Id)
+      return; // new record, nothing to retrieve yet
+
+    this.loading = true;
+    this.loadedForId = entityRef.Id;
 
     try {
       const result = await context.webAPI.retrieveRecord(entityRef.EntityName, entityRef.Id, `?$select=${rollupField},${rollupField}_date`);
@@ -97,6 +133,9 @@ export class RollupFieldControl extends React.Component<IRollupFieldControlProps
         updated : "Error while getting data : " + (error as Error).message,
         result : "error"
       });
+    }
+    finally {
+      this.loading = false;
     }
   }
 

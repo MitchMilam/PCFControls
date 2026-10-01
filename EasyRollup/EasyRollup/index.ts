@@ -28,14 +28,9 @@ export class EasyRollupField implements ComponentFramework.ReactControl<IInputs,
 		this._context = context; 
 
 		this.notifyOutputChanged = notifyOutputChanged;
-		// @ts-ignore
-		var contextInfo = context.mode.contextInfo;
-
 		this._recordDetails = new EntityReferenceDef();
-		this._recordDetails.EntityName = contextInfo.entityTypeName;
-		this._recordDetails.Id = contextInfo.entityId;
-		this._recordDetails.Name = contextInfo.entityRecordName;
-		this._recordDetails.EntitySetName = this.getEntityPluralName(contextInfo.entityTypeName);
+		this.refreshRecordDetails(context);
+		const contextInfo = this.getContextInfo(context);
 
 		// Replace the guessed plural with the real entity set name once metadata is available
 		const utils = context.utils as any;
@@ -47,6 +42,30 @@ export class EasyRollupField implements ComponentFramework.ReactControl<IInputs,
 				}
 			}, () => { /* keep the guessed name */ });
 		}
+	}
+
+	private getContextInfo(context: ComponentFramework.Context<IInputs>) : any {
+		const page = (context as any).page;
+		// @ts-ignore
+		const info = context.mode.contextInfo ?? {};
+		return {
+			entityTypeName : info.entityTypeName || page?.entityTypeName,
+			entityId : info.entityId || page?.entityId,
+			entityRecordName : info.entityRecordName
+		};
+	}
+
+	// The record id can be empty at init time (form still loading, or a new unsaved record), so re-read it on every update
+	private refreshRecordDetails(context: ComponentFramework.Context<IInputs>) {
+		const info = this.getContextInfo(context);
+		if (!info.entityTypeName)
+			return;
+
+		this._recordDetails.EntityName = info.entityTypeName;
+		this._recordDetails.Id = info.entityId ? String(info.entityId).replace(/[{}]/g, "") : "";
+		this._recordDetails.Name = info.entityRecordName;
+		if (!this._recordDetails.EntitySetName)
+			this._recordDetails.EntitySetName = this.getEntityPluralName(info.entityTypeName);
 	}
 
 	private renderControl(context: ComponentFramework.Context<IInputs>) : React.ReactElement {
@@ -67,6 +86,7 @@ export class EasyRollupField implements ComponentFramework.ReactControl<IInputs,
 	 */
 	public updateView(context: ComponentFramework.Context<IInputs>): React.ReactElement
 	{
+		this.refreshRecordDetails(context);
 		return this.renderControl(context);
 	}
 
