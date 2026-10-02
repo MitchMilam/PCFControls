@@ -197,7 +197,7 @@ export class RollupFieldControl extends React.Component<IRollupFieldControlProps
     return (
       <div style={{ width: "100%", display: "flex", flexDirection: labelOnTop ? "column" : "row", alignItems: labelOnTop ? "stretch" : "flex-start" }}>
         {labelText && (
-          <label style={labelOnTop ? { paddingBottom: "4px", fontFamily: "inherit", fontSize: "14px" } : { flex: `0 0 ${Math.min(Math.max(this.props.labelWidth, 5), 90)}%`, paddingTop: "6px", boxSizing: "border-box", fontFamily: "inherit", fontSize: "14px" }}>
+          <label style={labelOnTop ? { paddingBottom: "4px", fontFamily: "inherit", fontSize: "14px" } : { flex: `0 0 ${Math.min(Math.max(this.props.labelWidthPx, 40), 600)}px`, paddingTop: "6px", boxSizing: "border-box", fontFamily: "inherit", fontSize: "14px" }}>
             {labelText}
           </label>
         )}
