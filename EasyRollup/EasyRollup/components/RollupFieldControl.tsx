@@ -190,8 +190,18 @@ export class RollupFieldControl extends React.Component<IRollupFieldControlProps
   }
 
   public render(): React.ReactNode {
+    // A bound column gets its label from the form; only draw one when the control stands alone
+    const showLabel = this.props.isUnbound && this.props.labelPosition !== "Hidden";
+    const labelText = showLabel ? (this.props.label || this.state.displayName) : undefined;
+    const labelOnTop = this.props.labelPosition === "Top";
     return (
-      <div style={{ width: "100%" }}>
+      <div style={{ width: "100%", display: "flex", flexDirection: labelOnTop ? "column" : "row", alignItems: labelOnTop ? "stretch" : "flex-start" }}>
+        {labelText && (
+          <label style={labelOnTop ? { paddingBottom: "4px", fontFamily: "inherit", fontSize: "14px" } : { flex: `0 0 ${Math.min(Math.max(this.props.labelWidth, 5), 90)}%`, paddingTop: "6px", boxSizing: "border-box", fontFamily: "inherit", fontSize: "14px" }}>
+            {labelText}
+          </label>
+        )}
+        <div style={{ flex: 1, minWidth: 0 }}>
         <FluentProvider theme={webLightTheme}>
           <Tooltip 
             content={this.state.date ? `Last refreshed on ${this.state.date}` : "Not refreshed yet"}
@@ -214,6 +224,7 @@ export class RollupFieldControl extends React.Component<IRollupFieldControlProps
             </Field>
           </Tooltip>
         </FluentProvider> 
+        </div>
       </div>
     )
   }
