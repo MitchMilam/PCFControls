@@ -73,7 +73,12 @@ export class EasyRollupField implements ComponentFramework.ReactControl<IInputs,
 			context : context,
 			entityRef : this._recordDetails,
 			rollupField : this.rollupField!,
-			clientUrl : (this._context as any).page.getClientUrl()
+			clientUrl : (this._context as any).page.getClientUrl(),
+			label : context.mode.label || undefined,
+			// A bound column carries its attributes; without one the form supplies no label, so the control draws its own
+			isUnbound : !(context.parameters.FieldToAttachControl as any)?.attributes?.LogicalName,
+			labelPosition : (context.parameters.LabelPosition?.raw as any) || "Left",
+			labelWidth : context.parameters.LabelWidth?.raw ?? 34.4
 		}
 
 		return React.createElement(RollupFieldControl,  rollupProps);
