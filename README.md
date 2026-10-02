@@ -18,19 +18,25 @@ The idea of the click is to have a common field with the look'n'feel similar to 
 Drawback, when attaching the PCF control to a rollup field, the look'n'feel by default remains.
 Model-driven forms always render their built-in rollup UI for rollup (and calculated) columns, and a PCF control bound to one does not replace it.
 
-**Recommended setup:** attach the control to a dedicated, otherwise unused placeholder column (e.g. a single line of text or a whole number named `Rollup Display - <name>`), put only that placeholder on the form, and **do not add the real rollup field to the form**. The control never writes to the placeholder; it reads the rollup value itself through the Web API, using the logical name you set in the `RollupField` parameter.
+**Recommended setup:** add the control to the form as a **standalone component** (it does not need to be bound to any column), set the `RollupField` parameter to the rollup column's logical name, and **do not add the real rollup field to the form**. The control reads the rollup value itself through the Web API and never writes anything back.
+
+When it is not bound to a column, the control draws its own label using the label you set on the component in the form designer. The form does not tell a PCF control where a section places its labels, so use `LabelPosition` (Left, Top or Hidden) and `LabelWidth` to match the other fields.
+
+**Alternative:** you can still bind the control to a dedicated, otherwise unused column (a single line of text, a number or a currency) and put only that column on the form. In that case the form draws the label and the control draws none.
 
 ### Demo 
 On top you will find the standard behavior and at the bottom the PCF behavior
 ![](https://carfupstorage.blob.core.windows.net/sharex/2024_01_04_09-59-27_msedge.gif)
 
 ### Configuration
-There are 2 mandatory parameters to customize the PCF.
+Only `RollupField` is required.
 
 |Parameter|Description|Required|
 |:---------|:-----------|:----:|
-|FieldToAttachControl|Field to attach the control|x|
 |RollupField|Logical name of the rollup field|x|
+|FieldToAttachControl|Optional column to bind the control to. Leave empty to use the control as a standalone component||
+|LabelPosition|Where the label is drawn when the control is not bound to a column: Left (default), Top or Hidden||
+|LabelWidth|Width of the left label column as a percentage of the control width (default 34.4). Adjust to line the value up with the other fields||
 
 ## Quick Edit Form
 **Available to be bind on a text field or a Lookup field direct !**
