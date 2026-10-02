@@ -15,5 +15,5 @@ export interface IRollupFieldControlProps {
 	label? : string,
 	isUnbound : boolean,
 	labelPosition : "Left" | "Top" | "Hidden",
-	labelWidth : number
+	labelWidthPx : number
   }
