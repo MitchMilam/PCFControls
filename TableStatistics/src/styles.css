@@ -1,0 +1,19 @@
+:root { --bg:#fff; --fg:#201f1e; --muted:#605e5c; --line:#d2d0ce; --accent:#0f6cbd; --err:#a4262c; --head:#f3f2f1; }
+* { box-sizing: border-box; }
+body { margin:0; font:14px/1.4 "Segoe UI", system-ui, sans-serif; color:var(--fg); background:var(--bg); }
+.app { padding:16px; display:flex; flex-direction:column; gap:12px; height:100vh; }
+h1 { font-size:18px; margin:0; font-weight:600; }
+textarea { width:100%; min-height:110px; font:13px/1.4 Consolas, monospace; padding:8px; border:1px solid var(--line); border-radius:4px; resize:vertical; }
+.row { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+input[type=text] { padding:6px 8px; border:1px solid var(--line); border-radius:4px; font:inherit; }
+button { padding:6px 14px; border:1px solid var(--accent); background:var(--accent); color:#fff; border-radius:4px; font:inherit; cursor:pointer; }
+button.secondary { background:#fff; color:var(--accent); }
+button:disabled { opacity:.5; cursor:default; }
+.status { color:var(--muted); }
+.error { color:var(--err); white-space:pre-wrap; background:#fdf3f4; border:1px solid #eebbc0; padding:8px; border-radius:4px; }
+.grid { overflow:auto; border:1px solid var(--line); border-radius:4px; flex:1; min-height:120px; }
+table { border-collapse:collapse; width:100%; }
+th, td { padding:5px 10px; border-bottom:1px solid var(--line); text-align:left; white-space:nowrap; }
+th { position:sticky; top:0; background:var(--head); font-weight:600; }
+.num { text-align:right; font-variant-numeric:tabular-nums; }
+.muted { color:var(--muted); }
